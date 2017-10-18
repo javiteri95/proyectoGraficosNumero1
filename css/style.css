@@ -1,0 +1,15 @@
+body {
+	/*esto es para q se extienda por toda la pagina*/
+	margin: 0;
+	overflow: hidden;
+}
+canvas { width: 100%; height: 100% }
+#navbar-container {
+	padding: 0;
+}
+#navbar {
+	margin: 0;
+}
+.pt-5p {
+	padding-top: 5%;
+}

@@ -5,6 +5,16 @@ var scene, renderer, camera;
 // Para poder visualizar al area del cono de luz, podemos usar un 'lightHelper'
 var spotLight, lightHelper;
 
+/*
+***********************************************************************************
+**********             OBJETOS PARA PODER SELECCIONAR UN OBJETO          **********
+***********************************************************************************
+*/
+//de forma sencilla crea una especie de rayo, que es la forma de interactuar del listener con threejs ver : https://soledadpenades.com/articles/three-js-tutorials/object-picking/
+var raycaster = new THREE.Raycaster(); // create once
+//crea un vector del mouse
+var mouseVector = new THREE.Vector2(); // create once
+
 function init () {
 	/*
 	*****************************************************************************
@@ -109,6 +119,8 @@ function init () {
 	scene.add(plane);
 
 	window.addEventListener('resize', onResize, false);
+	//hace el click
+	window.addEventListener( 'click', onMouseMove, false );
 }
 
 // Implementamos una función que permita mantener el tamaño de la escena en al navegador cuando el tamaño de la ventana cambie
@@ -123,6 +135,37 @@ function render() {
 	lightHelper.update();
 	// shadowCameraHelper.update();
 	renderer.render(scene, camera);
+}
+//esta funcion es la especial, es la funcion del listener todo lo que esta dentro de aqui . Al hacer click todo lo que esta aqui se ejecuta.
+function onMouseMove( e ) {
+		//normalizacion, importante ya que la forma de renderizaado del dom es diferente a la webGL, se hace esto
+		mouseVector.x = 2 * (e.clientX / window.innerWidth) - 1;
+		mouseVector.y = 1 - 2 * ( e.clientY /  window.innerHeight );
+
+		//se le dice al rayo, cual es su vector origen
+		raycaster.setFromCamera( mouseVector, camera );
+		//intersects es un arreglo con todo los objetos que el rayo intersecta, dado q esta enlazado elmouse todo los objetos que sean hijos de scene y que atraviese el mouse
+		intersects = raycaster.intersectObjects( scene.children );
+
+		console.log(intersects[0].object.geometry.type)
+		/*
+		scene.children.forEach(function( element ) {
+			//scene.material.color.setRGB( cube.grayness, cube.grayness, cube.grayness );
+			console.log(element.name);
+		});
+		*/
+
+		//solo imprimo los objetos que atraviesa, aqui se modificara
+		for( var i = 0; i < intersects.length; i++ ) {
+			var intersection = intersects[ i ],
+				obj = intersection.object;
+				console.log(obj);
+
+			
+		}
+		
+
+		
 }
 init();
 render();

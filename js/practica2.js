@@ -7,13 +7,13 @@ var spotLight, lightHelper;
 
 /*
 ***********************************************************************************
-**********             OBJETOS PARA PODER SELECCIONAR UN OBJETO          **********
+**********               SELECCION DE OBJETOS - PROYECCIONES             **********
 ***********************************************************************************
 */
-//de forma sencilla crea una especie de rayo, que es la forma de interactuar del listener con threejs ver : https://soledadpenades.com/articles/three-js-tutorials/object-picking/
-var raycaster = new THREE.Raycaster(); // create once
-//crea un vector del mouse
-var mouseVector = new THREE.Vector2(); // create once
+// Para determinar qué objetos se encuentran debajo del mouse, "lanzamos un rayo" desde la posición del mouse hacia el espacio 3D en la misma dirección de la cámara
+// Se necesitan dos objetos clave: un vector para el mouse y un raycaster para "lanzar los rayos"
+var mouseVector = new THREE.Vector3();
+var raycaster = new THREE.Raycaster();
 
 function init () {
 	/*
@@ -40,7 +40,7 @@ function init () {
 	// Podemos escoger entre distintos tipos de camara, cada una con su propia perspectiva (Ej: PerspectiveCamera).
 	// El constructor recibe 3 atributos: campo de visión, ratio y límites del plano.
 	camera = new THREE.PerspectiveCamera(35, window.innerWidth/window.innerHeight, 0.1, 1000);
-	camera.position.set(-75, 70, 5);
+	camera.position.set(-40, 30, 5);
 	camera.lookAt(scene.position);
 
 	/*
@@ -119,8 +119,7 @@ function init () {
 	scene.add(plane);
 
 	window.addEventListener('resize', onResize, false);
-	//hace el click
-	window.addEventListener( 'click', onMouseMove, false );
+	window.addEventListener( 'click', onMouseClick, false );
 }
 
 // Implementamos una función que permita mantener el tamaño de la escena en al navegador cuando el tamaño de la ventana cambie
@@ -136,36 +135,27 @@ function render() {
 	// shadowCameraHelper.update();
 	renderer.render(scene, camera);
 }
-//esta funcion es la especial, es la funcion del listener todo lo que esta dentro de aqui . Al hacer click todo lo que esta aqui se ejecuta.
-function onMouseMove( e ) {
-		//normalizacion, importante ya que la forma de renderizaado del dom es diferente a la webGL, se hace esto
-		mouseVector.x = 2 * (e.clientX / window.innerWidth) - 1;
-		mouseVector.y = 1 - 2 * ( e.clientY /  window.innerHeight );
 
-		//se le dice al rayo, cual es su vector origen
-		raycaster.setFromCamera( mouseVector, camera );
-		//intersects es un arreglo con todo los objetos que el rayo intersecta, dado q esta enlazado elmouse todo los objetos que sean hijos de scene y que atraviese el mouse
-		intersects = raycaster.intersectObjects( scene.children );
+// Esta es la función que vamos a ejecutar para realizar el picking al dar click con el mouse
+function onMouseClick( e ) {
+	// Las coordenadas del mouse están dadas en base a su posición en la pantalla, por lo que debemos convertirlas a sus respectivas coordenadas en un plano cartesiano
+	mouseVector.x = 2 * (e.clientX / window.innerWidth) - 1;
+	mouseVector.y = 1 - 2 * ( e.clientY /  window.innerHeight );
 
-		console.log(intersects[0].object.geometry.type)
-		/*
-		scene.children.forEach(function( element ) {
-			//scene.material.color.setRGB( cube.grayness, cube.grayness, cube.grayness );
-			console.log(element.name);
-		});
-		*/
+	// Determinamos el punto de origen del rayo
+	raycaster.setFromCamera( mouseVector.clone(), camera );
 
-		//solo imprimo los objetos que atraviesa, aqui se modificara
-		for( var i = 0; i < intersects.length; i++ ) {
-			var intersection = intersects[ i ],
-				obj = intersection.object;
-				console.log(obj);
+	// Luego obtenemos todos los objetos que el rayo intersecta. Esto lo hacemos en la forma de un arreglo en el cual se enlaza el vector del mouse a todo los objetos que sean hijos de scene y que sean atravesados por este
+	intersects = raycaster.intersectObjects( scene.children );
 
-			
+	if ( intersects.length > 0 ) {
+		if (intersects[0].object.geometry.type != 'PlaneGeometry') {
+			// console.log(intersects[0].object.geometry.type)
+			console.log(intersects[0].object.name);
+			intersects[ 0 ].object.material.color.setHex( Math.random() * 0xffffff );
+			render();
 		}
-		
-
-		
+	}
 }
 init();
 render();

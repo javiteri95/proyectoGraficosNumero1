@@ -1,3 +1,4 @@
+
 $(function () {
 	//esenciales/*
 	var scene = new THREE.Scene();
@@ -53,7 +54,7 @@ $(function () {
 
 				cube.rotation.x += 0.1;// hace  rotacion en x
 				cube.rotation.y += 0.1; // hace rotacion en y
-				cube.scale.set(2,2,2);// change of size
+				cube.scale.set(0.6,0.5,0.5); //auto resize del cubo
 				//sphere.rotation.x +=0.1;
 				//sphere.rotation.z +=0.1;
 				renderer.render(scene, camera);			

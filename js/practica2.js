@@ -36,11 +36,15 @@ function init () {
 	renderer.gammaInput = true;
 	renderer.gammaOutput = true;
 
+	// También podemos añadir los ejes de coordenadas al escenario
+	var sceneAxis = new THREE.AxisHelper(100);
+	scene.add(sceneAxis);
+
 	// Instanciamos la cámara. Nos permitirá visualizar el escenario.
 	// Podemos escoger entre distintos tipos de camara, cada una con su propia perspectiva (Ej: PerspectiveCamera).
 	// El constructor recibe 3 atributos: campo de visión, ratio y límites del plano.
 	camera = new THREE.PerspectiveCamera(35, window.innerWidth/window.innerHeight, 0.1, 1000);
-	camera.position.set(-40, 30, 5);
+	camera.position.set(-35, 20, 30);
 	camera.lookAt(scene.position);
 
 	/*
@@ -97,17 +101,53 @@ function init () {
 	*/
 	// Para poder crear figuras necesitamos 3 cosas: una geometría, un material y un "mezclador" (Mesh).
 	// La geometría le da la forma a la figura. En este caso una "BoxGeometry" para crear un cubo.
-	var geometry = new THREE.BoxGeometry(4, 4, 4);
+	var cube_geometry = new THREE.BoxGeometry(4, 4, 4);
 	// El material nos permite especificar texturas y color.
-	var material = new THREE.MeshPhongMaterial( {color: 0x00ff00, dithering: true} );
+	var cube_material = new THREE.MeshPhongMaterial( {color: 0x00ff00, dithering: true} );
 	// El Mesh es un objeto que toma una geometría y le aplica un material.
-	var cube = new THREE.Mesh(geometry, material);
-	cube.position.set(-2, 2, 0);
+	var cube = new THREE.Mesh(cube_geometry, cube_material);
+	cube.position.set(0, 2, 0);
 	// Podemos habilitar a nuestra figura para que proyecte una sombra
 	cube.castShadow = true;
 	cube.name = 'active_shape';
 	// Posteriormente podemos añadir la figura al escenario.
 	scene.add(cube);
+
+	var sphere_geometry = new THREE.SphereGeometry(4,20,20);
+	var sphere_material = new THREE.MeshPhongMaterial({color: 0x00ff00, dithering: true});
+	var sphere = new THREE.Mesh(sphere_geometry, sphere_material);
+	sphere.position.set(20, 4, 0);
+	sphere.castShadow = true;
+	var sphereAxis = new THREE.AxisHelper(10);
+	sphere.add(sphereAxis);
+	scene.add(sphere);
+
+	var cylinder_geometry = new THREE.CylinderGeometry(5,5,10, 30);
+	var cylinder_material = new THREE.MeshPhongMaterial({color: 0x00ff00, dithering: true});
+	var cylinder = new THREE.Mesh(cylinder_geometry, cylinder_material);
+	cylinder.position.set(-20, 5, 0);
+	cylinder.castShadow = true;
+	var cylinderAxis = new THREE.AxisHelper(10);
+	cylinder.add(cylinderAxis);
+	scene.add(cylinder);
+
+	var pyramid_geometry = new THREE.CylinderGeometry(0, 5, 10, 4, false);
+	var pyramid_material = new THREE.MeshPhongMaterial({color: 0x00ff00, dithering: true});
+	var pyramid = new THREE.Mesh(pyramid_geometry, pyramid_material);
+	pyramid.position.set(0,5,20);
+	pyramid.castShadow = true;
+	var pyramidAxis = new THREE.AxisHelper(10);
+	pyramid.add(pyramidAxis);
+	scene.add(pyramid);
+
+	var torus_geometry = new THREE.TorusGeometry(5, 2, 16, 100);
+	var torus_material = new THREE.MeshPhongMaterial({color: 0x00ff00, dithering: true});
+	var torus = new THREE.Mesh(torus_geometry, torus_material);
+	torus.position.set(0,6,-20);
+	torus.castShadow = true;
+	var torusAxis = new THREE.AxisHelper(10);
+	torus.add(torusAxis);
+	scene.add(torus);
 
 	var planeGeometry = new THREE.PlaneGeometry(2000, 2000);
 	var planeMaterial = new THREE.MeshPhongMaterial({color : 0xcccccc, dithering: true});
@@ -149,13 +189,63 @@ function onMouseClick( e ) {
 	intersects = raycaster.intersectObjects( scene.children );
 
 	if ( intersects.length > 0 ) {
-		if (intersects[0].object.geometry.type != 'PlaneGeometry') {
-			// console.log(intersects[0].object.geometry.type)
-			console.log(intersects[0].object.name);
-			intersects[ 0 ].object.material.color.setHex( Math.random() * 0xffffff );
+		if (intersects[0].object.geometry.type != 'PlaneGeometry' && intersects[0].object.geometry.type != 'BufferGeometry') {
+			for (var i = 0; i < scene.children.length; i++) {
+				if (scene.children[i].name == 'active_shape') {
+					scene.children[i].name = ''
+
+					var geometry = intersects[0].object.geometry.type;
+					var text = '';
+					switch(geometry) {
+						case 'SphereGeometry':
+							text = 'Esfera';
+							break;
+						case 'BoxGeometry':
+							text = 'Cubo';
+							break;
+						case 'CylinderGeometry':
+							if (intersects[0].object.geometry.parameters.radiusTop  == 0) {
+								text = 'Pirámide';
+							} else {
+								text = 'Cilindro';
+							}
+							break;
+						case 'TorusGeometry':
+							text = 'Toroide';
+							break;
+					}
+					$('.active_shape').html(text);
+				}
+			}
+			intersects[ 0 ].object.name = 'active_shape';
 			render();
 		}
 	}
 }
+
+function deform(figura, constantes){
+	var matrix = new THREE.Matrix4();
+	//constantes = [Syx, Szx , Sxy , Szy , Sxz , Syz]
+
+	matrix.set(1,
+		constantes[0],
+		constantes[1],
+		0,
+		constantes[2],
+		1,
+		constantes[3],
+		0,
+		constantes[4], 
+		constantes[5],
+		1,
+		0,
+		0,
+		0,
+		0,
+		1);
+
+	figura.geometry.applyMatrix( matrix);
+}
+
 init();
 render();

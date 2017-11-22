@@ -100,9 +100,10 @@ $(document).ready(function(){
 
 	$("#slider_deform").slider({
 		min: 0,
-		max: 1,
+		max: 0.9,
 		step: 0.1,
 		slide: function(event, ui){
+		
 			var value = ui.value;
 			var matrix = [value, value, value, value, value, value];
 			for (var i = 0; i < scene.children.length; i++) {

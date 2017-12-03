@@ -15,6 +15,7 @@ var spotLight, lightHelper;
 var mouseVector = new THREE.Vector3();
 var raycaster = new THREE.Raycaster();
 
+
 function init () {
 	/*
 	*****************************************************************************
@@ -124,6 +125,7 @@ function init () {
 	cube.name = 'active_shape';
 	// Posteriormente podemos añadir la figura al escenario.
 	scene.add(cube);
+
 
 	var sphere_geometry = new THREE.SphereGeometry(4,20,20);
 	var sphere_material = new THREE.MeshPhongMaterial({color: 0x00ff00, dithering: true});
@@ -240,7 +242,8 @@ function onMouseClick( e ) {
 function deform(figura, constantes){
 	var matrix = new THREE.Matrix4();
 	//constantes = [Syx, Szx , Sxy , Szy , Sxz , Syz]
-
+	
+	
 	matrix.set(1,
 		constantes[0],
 		constantes[1],
@@ -257,8 +260,98 @@ function deform(figura, constantes){
 		0,
 		0,
 		1);
+	/*
+	matrix.set( 1 , 0, 0, 0 ,
+				0 , 1 , 0 , 0,
+				0 , 0 , 1 , 0 , 
+				0 , 0, 0 , 1);
+*//*
+	if (contadorDeformacion!= 0){
+		console.log("entro aqui");
+		scene.remove(figura);
 
-	figura.geometry.applyMatrix( matrix);
+		figura = figuraCopiarDeformar;
+		scene.add(figura);
+
+	}else{
+		figuraCopiarDeformar = figura;
+
+	}
+	
+	*/
+	/*
+	if (contadorDeformacion!= 0){
+		console.log("entro aqui");
+		scene.remove(figura);
+		
+		figura = figuraCopiarDeformar.clone();
+		figura.name = 'active_shape';
+		
+		scene.add(figura);
+
+	}else{
+		materialDeformar = figura.material.clone();
+		geometriaDeformar = new THREE.BoxGeometry(4, 4, 4);
+		posicionDeformacionX = figura.position.x
+		posicionDeformacionY = figura.position.y
+		posicionDeformacionZ = figura.position.z
+		figuraCopiarDeformar = new THREE.Mesh(geometriaDeformar, materialDeformar);
+		figuraCopiarDeformar.position.set(posicionDeformacionX, posicionDeformacionY, posicionDeformacionZ);
+		
+	}
+	*/
+	/*********************************************************************
+
+
+	Basicamente creo una nueva instancia de la figura para trabajar con eso, borro la que estaba, y creo una igual
+
+
+	************************************************************************/
+	scene.remove(figura);
+	var tipoFigura = figura.geometry.type;
+	switch (tipoFigura){
+		case  "BoxGeometry":
+				var geometriaDeformar = new THREE.BoxGeometry(4, 4, 4); 
+				break;
+		case  "SphereGeometry":
+				var geometriaDeformar = new THREE.SphereGeometry(4,20,20);
+
+				break
+		case  "TorusGeometry":
+				var geometriaDeformar = new THREE.TorusGeometry(5, 2, 16, 100);
+
+				break;
+
+		case  "CylinderGeometry":
+				if (figura.geometry.parameters.radiusTop  == 0){
+					var geometriaDeformar = new THREE.CylinderGeometry(0, 5, 10, 4, false);
+
+				}else{
+					var geometriaDeformar = new THREE.CylinderGeometry(5,5,10, 30);
+
+				}
+				break;
+	}
+	var materialDeformar = figura.material.clone();
+	var posicionDeformacionX = figura.position.x
+	var posicionDeformacionY = figura.position.y
+	var posicionDeformacionZ = figura.position.z
+	var figuraCopiarDeformar = new THREE.Mesh(geometriaDeformar, materialDeformar);
+	figuraCopiarDeformar.position.set(posicionDeformacionX, posicionDeformacionY, posicionDeformacionZ);
+	figuraCopiarDeformar.name = 'active_shape';
+
+	figuraCopiarDeformar.castShadow = true;
+	scene.add(figuraCopiarDeformar);
+
+
+
+	
+	
+
+
+	
+	figuraCopiarDeformar.geometry.applyMatrix( matrix);
+
 }
 
 init();

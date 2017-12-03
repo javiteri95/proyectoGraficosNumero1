@@ -57,7 +57,19 @@ function init () {
 	controls.addEventListener('change', render);
 	controls.minDistance = 20;
 	controls.maxDistance = 500;
-	controls.enablePan = false;
+	controls.enablePan = true;
+
+	// De manera similar, hay otras librerías para manejar controles de movimiento
+	/*var controls = new THREE.TrackballControls(camera, renderer.domElement);
+	controls.addEventListener('change', render);
+	controls.rotateSpeed = 1.0;
+	controls.zoomSpeed = 1.2;
+	controls.panSpeed = 0.8;
+	controls.noZoom = false;
+	controls.noPan = false;
+	controls.staticMoving = true;
+	controls.dynamicDampingFactor = 0.3;
+	controls.keys = [ 65, 83, 68 ];*/
 
 	/*
 	*****************************************************************************
@@ -215,6 +227,8 @@ function onMouseClick( e ) {
 							break;
 					}
 					$('.active_shape').html(text);
+
+					
 				}
 			}
 			intersects[ 0 ].object.name = 'active_shape';

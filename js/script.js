@@ -15,6 +15,9 @@ var spotLight, lightHelper;
 var mouseVector = new THREE.Vector3();
 var raycaster = new THREE.Raycaster();
 
+//esta lista es la lista de objetos a los q se le puede hacer drag and drop
+var intersectedObjects = [];
+
 
 function init () {
 	/*
@@ -54,11 +57,13 @@ function init () {
 	*****************************************************************************
 	*/
 	// La librería OrbitControls nos permite añadir al canvas controles de movimiento, para desplazar la cámara en una órbita alrededor del escenario.
+	
 	var controls = new THREE.OrbitControls(camera, renderer.domElement);
 	controls.addEventListener('change', render);
 	controls.minDistance = 20;
 	controls.maxDistance = 500;
 	controls.enablePan = true;
+	
 
 	// De manera similar, hay otras librerías para manejar controles de movimiento
 	/*var controls = new THREE.TrackballControls(camera, renderer.domElement);
@@ -123,8 +128,11 @@ function init () {
 	// Podemos habilitar a nuestra figura para que proyecte una sombra
 	cube.castShadow = true;
 	cube.name = 'active_shape';
+
+	intersectedObjects.push(cube);
 	// Posteriormente podemos añadir la figura al escenario.
 	scene.add(cube);
+
 
 
 	var sphere_geometry = new THREE.SphereGeometry(4,20,20);
@@ -134,6 +142,7 @@ function init () {
 	sphere.castShadow = true;
 	var sphereAxis = new THREE.AxisHelper(10);
 	sphere.add(sphereAxis);
+	intersectedObjects.push(sphere);
 	scene.add(sphere);
 
 	var cylinder_geometry = new THREE.CylinderGeometry(5,5,10, 30);
@@ -143,6 +152,7 @@ function init () {
 	cylinder.castShadow = true;
 	var cylinderAxis = new THREE.AxisHelper(10);
 	cylinder.add(cylinderAxis);
+	intersectedObjects.push(cylinder);
 	scene.add(cylinder);
 
 	var pyramid_geometry = new THREE.CylinderGeometry(0, 5, 10, 4, false);
@@ -152,6 +162,7 @@ function init () {
 	pyramid.castShadow = true;
 	var pyramidAxis = new THREE.AxisHelper(10);
 	pyramid.add(pyramidAxis);
+	intersectedObjects.push(pyramid);
 	scene.add(pyramid);
 
 	var torus_geometry = new THREE.TorusGeometry(5, 2, 16, 100);
@@ -161,6 +172,7 @@ function init () {
 	torus.castShadow = true;
 	var torusAxis = new THREE.AxisHelper(10);
 	torus.add(torusAxis);
+	intersectedObjects.push(torus);
 	scene.add(torus);
 
 	var planeGeometry = new THREE.PlaneGeometry(2000, 2000);
@@ -172,6 +184,17 @@ function init () {
 	plane.receiveShadow = true;
 	scene.add(plane);
 
+/*
+**********************************************************
+Esto se encarga del drag and drop
+**********************************************************
+
+*/
+	var dragControls = new THREE.DragControls(intersectedObjects , camera, renderer.domElement );
+	dragControls.addEventListener( 'dragstart', function ( event ) { controls.enabled = false; } );
+	dragControls.addEventListener( 'dragend', function ( event ) { controls.enabled = true; } );
+
+/**/
 	window.addEventListener('resize', onResize, false);
 	window.addEventListener( 'click', onMouseClick, false );
 }
@@ -188,6 +211,15 @@ function render() {
 	lightHelper.update();
 	// shadowCameraHelper.update();
 	renderer.render(scene, camera);
+}
+
+
+function animate() {
+
+	requestAnimationFrame( animate );
+
+	render();
+
 }
 
 // Esta es la función que vamos a ejecutar para realizar el picking al dar click con el mouse
@@ -265,40 +297,7 @@ function deform(figura, constantes){
 				0 , 1 , 0 , 0,
 				0 , 0 , 1 , 0 , 
 				0 , 0, 0 , 1);
-*//*
-	if (contadorDeformacion!= 0){
-		console.log("entro aqui");
-		scene.remove(figura);
 
-		figura = figuraCopiarDeformar;
-		scene.add(figura);
-
-	}else{
-		figuraCopiarDeformar = figura;
-
-	}
-	
-	*/
-	/*
-	if (contadorDeformacion!= 0){
-		console.log("entro aqui");
-		scene.remove(figura);
-		
-		figura = figuraCopiarDeformar.clone();
-		figura.name = 'active_shape';
-		
-		scene.add(figura);
-
-	}else{
-		materialDeformar = figura.material.clone();
-		geometriaDeformar = new THREE.BoxGeometry(4, 4, 4);
-		posicionDeformacionX = figura.position.x
-		posicionDeformacionY = figura.position.y
-		posicionDeformacionZ = figura.position.z
-		figuraCopiarDeformar = new THREE.Mesh(geometriaDeformar, materialDeformar);
-		figuraCopiarDeformar.position.set(posicionDeformacionX, posicionDeformacionY, posicionDeformacionZ);
-		
-	}
 	*/
 	/*********************************************************************
 
@@ -341,6 +340,7 @@ function deform(figura, constantes){
 	figuraCopiarDeformar.name = 'active_shape';
 
 	figuraCopiarDeformar.castShadow = true;
+	intersectedObjects.push(figuraCopiarDeformar);
 	scene.add(figuraCopiarDeformar);
 
 
@@ -354,5 +354,7 @@ function deform(figura, constantes){
 
 }
 
+
+
 init();
-render();
+animate();

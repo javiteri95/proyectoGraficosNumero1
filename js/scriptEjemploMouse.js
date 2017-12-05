@@ -33,7 +33,7 @@ var sbFragmentShader = [
 ].join("\n");
 
 var raycaster = new THREE.Raycaster();
-var selection
+var selection;
 var offset = new THREE.Vector3();
 var plane, controls;
 var clock, stats;

@@ -17,6 +17,8 @@ var raycaster = new THREE.Raycaster();
 
 //esta lista es la lista de objetos a los q se le puede hacer drag and drop
 var intersectedObjects = [];
+var dragControls, controls;
+
 
 
 function init () {
@@ -58,7 +60,7 @@ function init () {
 	*/
 	// La librería OrbitControls nos permite añadir al canvas controles de movimiento, para desplazar la cámara en una órbita alrededor del escenario.
 	
-	var controls = new THREE.OrbitControls(camera, renderer.domElement);
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
 	controls.addEventListener('change', render);
 	controls.minDistance = 20;
 	controls.maxDistance = 500;
@@ -190,7 +192,7 @@ Esto se encarga del drag and drop
 **********************************************************
 
 */
-	var dragControls = new THREE.DragControls(intersectedObjects , camera, renderer.domElement );
+	dragControls = new THREE.DragControls(intersectedObjects , camera, renderer.domElement );
 	dragControls.addEventListener( 'dragstart', function ( event ) { controls.enabled = false; } );
 	dragControls.addEventListener( 'dragend', function ( event ) { controls.enabled = true; } );
 
@@ -272,8 +274,33 @@ function onMouseClick( e ) {
 }
 
 function deform(figura, constantes){
+	//var correctnessMatrix  = new THREE.Matrix4();
 	var matrix = new THREE.Matrix4();
 	//constantes = [Syx, Szx , Sxy , Szy , Sxz , Syz]
+/*
+	if (previousDeformationConstants != null){
+		correctnessMatrix.set(1,
+		previousDeformationConstants[0],
+		previousDeformationConstants[1],
+		0,
+		previousDeformationConstants[2],
+		1,
+		previousDeformationConstants[3],
+		0,
+		previousDeformationConstants[4], 
+		previousDeformationConstants[5],
+		1,
+		0,
+		0,
+		0,
+		0,
+		1);
+
+		figura.geometry.applyMatrix( correctnessMatrix);
+
+	}
+
+	*/
 	
 	
 	matrix.set(1,
@@ -292,13 +319,11 @@ function deform(figura, constantes){
 		0,
 		0,
 		1);
-	/*
-	matrix.set( 1 , 0, 0, 0 ,
-				0 , 1 , 0 , 0,
-				0 , 0 , 1 , 0 , 
-				0 , 0, 0 , 1);
 
-	*/
+	
+
+
+
 	/*********************************************************************
 
 
@@ -306,7 +331,13 @@ function deform(figura, constantes){
 
 
 	************************************************************************/
+	
 	scene.remove(figura);
+	var index = intersectedObjects.indexOf(figura);
+
+	if (index > -1) {
+		 intersectedObjects.splice(index, 1);
+	}
 	var tipoFigura = figura.geometry.type;
 	switch (tipoFigura){
 		case  "BoxGeometry":
@@ -342,6 +373,10 @@ function deform(figura, constantes){
 	figuraCopiarDeformar.castShadow = true;
 	intersectedObjects.push(figuraCopiarDeformar);
 	scene.add(figuraCopiarDeformar);
+	
+	dragControls = new THREE.DragControls(intersectedObjects , camera, renderer.domElement );
+	dragControls.addEventListener( 'dragstart', function ( event ) { controls.enabled = false; } );
+	dragControls.addEventListener( 'dragend', function ( event ) { controls.enabled = true; } );
 
 
 
@@ -351,6 +386,8 @@ function deform(figura, constantes){
 
 	
 	figuraCopiarDeformar.geometry.applyMatrix( matrix);
+	
+	//previousDeformationConstants = [1/constantes[0], 1/constantes[1], 1/constantes[2], 1/constantes[3], 1/constantes[4], 1/constantes[5]];
 
 }
 

@@ -32,3 +32,13 @@ canvas {
 .text-bold {
 	font-weight: bold;
 }
+a[class~="texture_remover"] {
+	transition: all 0.15s ease-in-out;
+	-webkit-transition: all 0.15s ease-in-out;
+	-moz-transition: all 0.15s ease-in-out;
+	-o-transition: all 0.15s ease-in-out;
+}
+a[class~="texture_remover"]:hover {
+	background-color: #F65A5A !important;
+	color: #FFF !important;
+}

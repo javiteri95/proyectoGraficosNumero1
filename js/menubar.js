@@ -158,3 +158,32 @@ $(document).ready(function(){
 		}
 	});
 });
+$('.texture_trigger').on('click', function(){
+	event.preventDefault();
+	for (var i = 0; i < scene.children.length; i++) {
+		if (scene.children[i].name == 'active_shape') {
+			var texture_name = $(this).attr('data-texture');
+			var texture_img = texture_name + '.jpg'
+			// scene.children[i].material.color.setHex('');
+			var texture = new THREE.TextureLoader().load('img/textures/' + texture_img);
+			scene.children[i].material = new THREE.MeshPhongMaterial( {map: texture, dithering: true} );
+			render();
+			break;
+		}
+	}
+});
+$('.texture_remover').on('click', function(){
+	event.preventDefault();
+	for (var i = 0; i < scene.children.length; i++) {
+		if (scene.children[i].name == 'active_shape') {
+			// scene.children[i].material.color.setHex('');
+			var color_string = $('#custom').spectrum('get').toHexString();
+			var hex_string = '0x' + color_string.replace('#', '');
+			scene.children[i].material.map = null;
+			scene.children[i].material.needsUpdate = true;
+			scene.children[i].material.color.setHex(hex_string);
+			render();
+			break;
+		}
+	}
+});

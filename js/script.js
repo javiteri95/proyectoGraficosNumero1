@@ -161,7 +161,16 @@ function init () {
 	// Posteriormente podemos añadir la figura al escenario.
 	scene.add(cube);
 
-
+	// También es posible crear figuras con textura
+	/*var cube_texture = new THREE.TextureLoader().load('img/textures/white_leather.jpg');
+	var cube_geometry = new THREE.BoxGeometry(4, 4, 4);
+	var cube_material = new THREE.MeshPhongMaterial( {map: cube_texture, dithering: true} );
+	var cube = new THREE.Mesh(cube_geometry, cube_material);
+	cube.position.set(0, 2, 0);
+	cube.castShadow = true;
+	cube.name = 'active_shape';
+	intersectedObjects.push(cube);
+	scene.add(cube);*/
 
 	var sphere_geometry = new THREE.SphereGeometry(4,20,20);
 	var sphere_material = new THREE.MeshPhongMaterial({color: 0x00ff00, dithering: true});
@@ -203,8 +212,16 @@ function init () {
 	intersectedObjects.push(torus);
 	scene.add(torus);
 
+	var plane_texture = new THREE.TextureLoader().load('img/textures/marble.jpg');
+	// Tambien podemos cambiar la forma en que la textura envuelve al objeto de forma horizontal(U) y vertical(V) en el UVMap
+	// En este caso 'RepeatWrapping' nos permite repetir la textura
+	plane_texture.wrapS = THREE.RepeatWrapping;
+	plane_texture.wrapT = THREE.RepeatWrapping;
+	// A través del atributo 'repeat' podemos decirle cuántas veces queremos que se repita la textura, y en qué dirección
+	plane_texture.repeat.set(150, 150);
 	var planeGeometry = new THREE.PlaneGeometry(2000, 2000);
-	var planeMaterial = new THREE.MeshPhongMaterial({color : 0xcccccc, dithering: true});
+	// var planeMaterial = new THREE.MeshPhongMaterial({color : 0xcccccc, dithering: true});
+	var planeMaterial = new THREE.MeshPhongMaterial({map: plane_texture, dithering: true});
 	var plane = new THREE.Mesh(planeGeometry,planeMaterial);
 	plane.rotation.x = -0.5 * Math.PI;
 	plane.position.set(15, 0, 0);

@@ -20,6 +20,28 @@ var intersectedObjects = [];
 var dragControls, controls;
 
 
+var sbVertexShader = [
+"varying vec3 vWorldPosition;",
+"void main() {",
+"  vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
+"  vWorldPosition = worldPosition.xyz;",
+"  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+"}",
+].join("\n");
+
+var sbFragmentShader = [
+"uniform vec3 topColor;",
+"uniform vec3 bottomColor;",
+"uniform float offset;",
+"uniform float exponent;",
+"varying vec3 vWorldPosition;",
+"void main() {",
+"  float h = normalize( vWorldPosition + offset ).y;",
+"  gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( h, exponent ), 0.0 ) ), 1.0 );",
+"}",
+].join("\n");
+
+
 
 function init () {
 	/*
@@ -52,6 +74,10 @@ function init () {
 	camera = new THREE.PerspectiveCamera(35, window.innerWidth/window.innerHeight, 0.1, 1000);
 	camera.position.set(-35, 20, 30);
 	camera.lookAt(scene.position);
+
+	/* grid effect*/
+	var gridHelper = new THREE.GridHelper( 75, 75, 0x000000, 0x000000 );
+	scene.add( gridHelper );
 
 	/*
 	*****************************************************************************
@@ -185,6 +211,8 @@ function init () {
 	// También podemos habilitar a las figuras para que reciban la sombra proyectada por otras
 	plane.receiveShadow = true;
 	scene.add(plane);
+
+	skyBox();
 
 /*
 **********************************************************
@@ -389,6 +417,18 @@ function deform(figura, constantes){
 	
 	//previousDeformationConstants = [1/constantes[0], 1/constantes[1], 1/constantes[2], 1/constantes[3], 1/constantes[4], 1/constantes[5]];
 
+}
+/* funcion que implementa el azul cielo*/
+function skyBox(){
+  var iSBrsize = 500;
+  var uniforms = {
+    topColor: {type: "c", value: new THREE.Color(0x0077ff)}, bottomColor: {type: "c", value: new THREE.Color(0xffffff)},
+    offset: {type: "f", value: iSBrsize}, exponent: {type: "f", value: 1.5}
+  }
+  var skyGeo = new THREE.SphereGeometry(iSBrsize, 32, 32);
+  skyMat = new THREE.ShaderMaterial({vertexShader: sbVertexShader, fragmentShader: sbFragmentShader, uniforms: uniforms, side: THREE.DoubleSide, fog: false});
+  skyMesh = new THREE.Mesh(skyGeo, skyMat);
+  scene.add(skyMesh);
 }
 
 

@@ -150,7 +150,7 @@ function render() {
 	renderer.render(scene, camera);
 }
 
-
+/* funcion que implementa el azul cielo*/
 function skyBox(){
   var iSBrsize = 500;
   var uniforms = {

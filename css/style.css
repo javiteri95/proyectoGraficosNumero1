@@ -42,3 +42,7 @@ a[class~="texture_remover"]:hover {
 	background-color: #F65A5A !important;
 	color: #FFF !important;
 }
+a[class~="texture_trigger"]:hover {
+	background-color: 	#efefef !important;
+	color:#28bab2 !important;
+}

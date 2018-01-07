@@ -163,6 +163,7 @@ $('.texture_trigger').on('click', function(){
 	for (var i = 0; i < scene.children.length; i++) {
 		if (scene.children[i].name == 'active_shape') {
 			var texture_name = $(this).attr('data-texture');
+			console.log(texture_name);
 			var texture_img = texture_name + '.jpg'
 			// scene.children[i].material.color.setHex('');
 			var texture = new THREE.TextureLoader().load('img/textures/' + texture_img);

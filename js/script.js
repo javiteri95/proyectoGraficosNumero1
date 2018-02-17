@@ -19,6 +19,11 @@ var raycaster = new THREE.Raycaster();
 var intersectedObjects = [];
 var dragControls, controls;
 
+var active_shape;
+var collidableMeshList = [];
+var lookAtVector = new THREE.Vector3();
+var normalMatrix = new THREE.Matrix3();
+var worldNormal = new THREE.Vector3();
 
 var sbVertexShader = [
 "varying vec3 vWorldPosition;",
@@ -156,6 +161,7 @@ function init () {
 	// Podemos habilitar a nuestra figura para que proyecte una sombra
 	cube.castShadow = true;
 	cube.name = 'active_shape';
+	active_shape = cube;
 
 	intersectedObjects.push(cube);
 	// Posteriormente podemos añadir la figura al escenario.
@@ -228,20 +234,22 @@ function init () {
 	// También podemos habilitar a las figuras para que reciban la sombra proyectada por otras
 	plane.receiveShadow = true;
 	scene.add(plane);
+	collidableMeshList.push(plane);
 
 	skyBox();
 
-/*
-**********************************************************
-Esto se encarga del drag and drop
-**********************************************************
-
-*/
+	/*
+	**********************************************************
+	Esto se encarga del drag and drop
+	**********************************************************
+	*/
 	dragControls = new THREE.DragControls(intersectedObjects , camera, renderer.domElement );
-	dragControls.addEventListener( 'dragstart', function ( event ) { controls.enabled = false; } );
-	dragControls.addEventListener( 'dragend', function ( event ) { controls.enabled = true; } );
-
-/**/
+	dragControls.addEventListener('dragstart', function(event){ 
+		controls.enabled = false;
+	});
+	dragControls.addEventListener( 'dragend', function ( event ) { 
+		controls.enabled = true;
+	} );
 	window.addEventListener('resize', onResize, false);
 	window.addEventListener( 'click', onMouseClick, false );
 }
@@ -252,21 +260,33 @@ function onResize() {
 	camera.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth, window.innerHeight );
 }
-
 // Con el renderizador configurado, las figuras añadida al escenario y la cámara configurada, podemos empezar a renderizar.
 function render() {
 	lightHelper.update();
 	// shadowCameraHelper.update();
 	renderer.render(scene, camera);
 }
-
-
+function update() {
+	var originPoint = active_shape.position.clone();
+	// console.log(originPoint);
+	for (var vertexIndex = 0; vertexIndex < active_shape.geometry.vertices.length; vertexIndex++) {		
+		var localVertex = active_shape.geometry.vertices[vertexIndex].clone();
+		var globalVertex = localVertex.applyMatrix4(active_shape.matrix);
+		var directionVector = globalVertex.sub( active_shape.position );
+		
+		var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+		var collisionResults = ray.intersectObjects(collidableMeshList);
+		if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
+			active_shape.position.y = collidableMeshList[0].position.y + active_shape.geometry.parameters.height/2;
+			render();
+		}
+	}
+	controls.update();
+}
 function animate() {
-
 	requestAnimationFrame( animate );
-
 	render();
-
+	// update();
 }
 
 // Esta es la función que vamos a ejecutar para realizar el picking al dar click con el mouse
@@ -286,7 +306,6 @@ function onMouseClick( e ) {
 			for (var i = 0; i < scene.children.length; i++) {
 				if (scene.children[i].name == 'active_shape') {
 					scene.children[i].name = ''
-
 					var geometry = intersects[0].object.geometry.type;
 					var text = '';
 					switch(geometry) {
@@ -308,46 +327,17 @@ function onMouseClick( e ) {
 							break;
 					}
 					$('.active_shape').html(text);
-
-					
 				}
 			}
-			intersects[ 0 ].object.name = 'active_shape';
+			intersects[0].object.name = 'active_shape';
+			active_shape = intersects[0].object;
 			render();
 		}
 	}
 }
 
 function deform(figura, constantes){
-	//var correctnessMatrix  = new THREE.Matrix4();
 	var matrix = new THREE.Matrix4();
-	//constantes = [Syx, Szx , Sxy , Szy , Sxz , Syz]
-/*
-	if (previousDeformationConstants != null){
-		correctnessMatrix.set(1,
-		previousDeformationConstants[0],
-		previousDeformationConstants[1],
-		0,
-		previousDeformationConstants[2],
-		1,
-		previousDeformationConstants[3],
-		0,
-		previousDeformationConstants[4], 
-		previousDeformationConstants[5],
-		1,
-		0,
-		0,
-		0,
-		0,
-		1);
-
-		figura.geometry.applyMatrix( correctnessMatrix);
-
-	}
-
-	*/
-	
-	
 	matrix.set(1,
 		constantes[0],
 		constantes[1],
@@ -364,19 +354,9 @@ function deform(figura, constantes){
 		0,
 		0,
 		1);
-
-	
-
-
-
 	/*********************************************************************
-
-
 	Basicamente creo una nueva instancia de la figura para trabajar con eso, borro la que estaba, y creo una igual
-
-
 	************************************************************************/
-	
 	scene.remove(figura);
 	var index = intersectedObjects.indexOf(figura);
 
@@ -422,19 +402,9 @@ function deform(figura, constantes){
 	dragControls = new THREE.DragControls(intersectedObjects , camera, renderer.domElement );
 	dragControls.addEventListener( 'dragstart', function ( event ) { controls.enabled = false; } );
 	dragControls.addEventListener( 'dragend', function ( event ) { controls.enabled = true; } );
-
-
-
-	
-	
-
-
-	
 	figuraCopiarDeformar.geometry.applyMatrix( matrix);
-	
-	//previousDeformationConstants = [1/constantes[0], 1/constantes[1], 1/constantes[2], 1/constantes[3], 1/constantes[4], 1/constantes[5]];
-
 }
+
 /* funcion que implementa el azul cielo*/
 function skyBox(){
   var iSBrsize = 500;
@@ -447,8 +417,6 @@ function skyBox(){
   skyMesh = new THREE.Mesh(skyGeo, skyMat);
   scene.add(skyMesh);
 }
-
-
 
 init();
 animate();

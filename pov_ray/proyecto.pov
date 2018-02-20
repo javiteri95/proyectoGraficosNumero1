@@ -94,7 +94,7 @@ sphere {
             refraction 1 
             ior 1.33 
         }
-    } // end of texture 
+    }  
 }  
 
    /*

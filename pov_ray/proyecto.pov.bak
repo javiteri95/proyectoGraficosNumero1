@@ -14,7 +14,7 @@ pigment{ gradient <0,1,0>  sine_wave
          scale 0.35
 } 
 camera {
-    location <0,1,-15>
+    location <0,1,-10>
     look_at <0,1,0>
     rotate <5, clock*(-410),5>
 }
@@ -78,33 +78,21 @@ cone {
     rotate  <clock*(-180),0,0>
     translate <+3,+2,0>
 }
- 
+
 sphere {
     <-4,1,2>,1.5
     texture{
         pigment { rgb<0, 0, 1> transmit 0.7 }
         finish {phong 0}
     }
-}   
-  
-sphere {
-    <-8,1,2>,1.5
-    texture { Polished_Chrome
-        finish { 
-            refraction 1 
-            ior 1.33 
-        }
-    } // end of texture 
-}  
+}
 
-   /*
 sphere {
     <-8,1,2>,1.5
     texture{
         pigment { rgb<0, 0, 1> filter 0.7}
     }
-} 
-*/
+}
 
 sphere {
     <-12,1,2>,1.5
